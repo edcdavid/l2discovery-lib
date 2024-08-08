@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/test-network-function/l2discovery-lib/pkg/l2client"
+	"github.com/redhat-best-practices-for-k8s/l2discovery-lib/pkg/l2client"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -56,7 +56,7 @@ func ExecCommand(pod *corev1.Pod, containerName string, command []string) (bytes
 		return buf, err
 	}
 
-	err = exec.Stream(remotecommand.StreamOptions{
+	err = exec.StreamWithContext(context.TODO(), remotecommand.StreamOptions{
 		Stdin:  os.Stdin,
 		Stdout: &buf,
 		Stderr: os.Stderr,

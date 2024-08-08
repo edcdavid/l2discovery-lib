@@ -12,11 +12,11 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
+	l2 "github.com/redhat-best-practices-for-k8s/l2discovery-exports"
+	"github.com/redhat-best-practices-for-k8s/l2discovery-lib/pkg/l2client"
+	"github.com/redhat-best-practices-for-k8s/l2discovery-lib/pkg/pods"
+	daemonsets "github.com/redhat-best-practices-for-k8s/privileged-daemonset"
 	"github.com/sirupsen/logrus"
-	l2 "github.com/test-network-function/l2discovery-exports"
-	"github.com/test-network-function/l2discovery-lib/pkg/l2client"
-	"github.com/test-network-function/l2discovery-lib/pkg/pods"
-	daemonsets "github.com/test-network-function/privileged-daemonset"
 	"github.com/yourbasic/graph"
 	v1core "k8s.io/api/core/v1"
 )
@@ -49,6 +49,10 @@ const (
 	timeoutDaemon                  = time.Second * 60
 	L2DiscoveryDuration            = time.Second * 15
 	l2DiscoveryImage               = "quay.io/testnetworkfunction/l2discovery:v5"
+	L2ContainerCPULim              = "100m"
+	L2ContainerCPUReq              = "100m"
+	L2ContainerMemLim              = "100M"
+	L2ContainerMemReq              = "100M"
 )
 
 type L2DaemonsetMode int64
@@ -161,7 +165,9 @@ func (config *L2DiscoveryConfig) DiscoverL2Connectivity(ptpInterfacesOnly bool) 
 	// Create L2 discovery daemonset
 	config.L2DsMode = StringToL2Mode(os.Getenv("L2_DAEMONSET"))
 	if config.L2DsMode == Managed {
-		_, err = daemonsets.CreateDaemonSet(L2DiscoveryDsName, L2DiscoveryNsName, L2DiscoveryContainerName, l2DiscoveryImage, timeoutDaemon)
+		matchLabels := make(map[string]string)
+		_, err = daemonsets.CreateDaemonSet(L2DiscoveryDsName, L2DiscoveryNsName, L2DiscoveryContainerName, l2DiscoveryImage, matchLabels, timeoutDaemon,
+			L2ContainerCPUReq, L2ContainerCPULim, L2ContainerMemReq, L2ContainerMemLim)
 		if err != nil {
 			return fmt.Errorf("error creating l2 discovery daemonset, err=%s", err)
 		}
