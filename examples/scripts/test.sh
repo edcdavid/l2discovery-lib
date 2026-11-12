@@ -1,7 +1,7 @@
 #!/bin/bash
 set -o nounset -o pipefail
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
 
 # Creates kind cluster
 cat >kind-config.yaml <<EOF
